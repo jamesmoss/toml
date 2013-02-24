@@ -49,6 +49,11 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($p, array('ports' => array(9001, 9002, 9003)));
 	}
 
+	public function testParsingComments()
+	{
+		$p = Parser::fromString("# This is a comment\ntitle=\"TOML example\"");
+		$this->assertEquals($p, array('title' => 'TOML example'));
+	}
 
 	public function testLoadingFromFile()
 	{
