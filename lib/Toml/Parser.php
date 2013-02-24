@@ -73,7 +73,7 @@ class Parser
 					throw new \Exception('Multiline strings are not supported.');	
 				}
 
-				if(!$inArray && $arrayDepth == 0) {
+				if($arrayDepth === 0) {
 					$this->processLine($buffer);
 					$inComment = false;
 					$buffer = '';
@@ -87,6 +87,10 @@ class Parser
 			}
 
 			$buffer.= $char;
+		}
+
+		if($arrayDepth > 0) {
+			throw new \Exception(sprintf('Unclosed array on line %s', $this->lineNum));
 		}
 
 		// Process any straggling content left in the buffer
@@ -107,13 +111,13 @@ class Parser
 		}
 
 		// Check for groups
-		if(preg_match('/^\[([^\]]+)\]/', $line, $matches)) {
+		if(preg_match('/^\[([^\]]+)\]$/', $line, $matches)) {
 			$this->setGroup($matches[1]);
 			return;
 		}
 
 		// Look for keys
-		if(preg_match('/(\S+)\s*=\s*(.+)/u', $line, $matches)) {
+		if(preg_match('/^(\S+)\s*=\s*(.+)/u', $line, $matches)) {
 			$this->group[$matches[1]] = $this->parseValue($matches[2]);
 			return;
 		}
@@ -136,6 +140,8 @@ class Parser
 		foreach($parts as $part) {
 			if(!isset($this->group[$part])) {
 				$this->group[$part] = array();
+			} elseif(!is_array($this->group[$part])) {
+				throw new \Exception(sprintf('%s has already been defined.', $keyGroup));
 			}
 
 			$this->group = &$this->group[$part];
@@ -170,7 +176,6 @@ class Parser
 		}
 
 		// Detect arrays
-		// TODO: Support multiline arrays
 		if(preg_match('/^\[(.*)\]$/u', $value)) {
 			return $this->parseArray($value);
 		}
@@ -197,19 +202,20 @@ class Parser
 		// strips the outer wrapping [ and ] characters and and whitespace from the strip
 		$array = preg_replace('/^\s*\[\s*(.*)\s*\]\s*$/um', "$1", $array);
 
-		$depth = 0;
-		$buffer = '';
-		$result = array();
+		$depth            = 0;
+		$buffer           = '';
+		$result           = array();
 		$searchEndOfArray = false;
-		$insideString = false;
+		$insideString     = false;
+		// TODO: This is a duplicate of the logic in the parse() method.
 		for($i = 0; $i < strlen($array); $i++) {
 			
-			if($array[$i] == '[') {
+			if($array[$i] === '[') {
 				$depth++;
 				$searchEndOfArray = $depth;
 			}
 
-			if($array[$i] == ']') {
+			if($array[$i] === ']') {
 				if($searchEndOfArray === $depth) {
 					$searchEndOfArray = false;
 				}
@@ -220,7 +226,7 @@ class Parser
 				$insideString = !$insideString;
 			}
 
-			if(!$insideString && $array[$i] == ',' && false === $searchEndOfArray ) {
+			if(!$insideString && $array[$i] === ',' && false === $searchEndOfArray ) {
 				$result[] = $this->parseValue(trim($buffer));
 				$buffer = '';
 				continue;

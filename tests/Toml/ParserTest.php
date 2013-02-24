@@ -101,9 +101,25 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals(array('main' => array('ip' => '192.168.1.1')), $p);
 	}
 
+	/**
+	* @expectedException Exception
+	*/
+	public function testBadKeyGroup()
+	{
+		$p = Parser::fromString("[main] some chars after = true\nip = \"192.168.1.1\"");
+	}
+
 	public function testNestedKeyGroup()
 	{
 		$p = Parser::fromString("[main.beta]\nip = \"192.168.1.1\"");
 		$this->assertEquals(array('main' => array('beta' => array('ip' => '192.168.1.1'))), $p);
+	}
+
+	/**
+	* @expectedException Exception
+	*/
+	public function testKeyGroupsDontOverrideDeclaredKeys()
+	{
+		$p = Parser::fromString("[fruit] type = \"apple\"\n[fruit.type]\napple = \"yes\"");
 	}
 }

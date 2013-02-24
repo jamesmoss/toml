@@ -39,4 +39,4 @@ Fork this repo, create a new branch and submit a pull request. Make sure any fea
 ## Todo
 
 - Better documentation and docblocks
-- Better errors displayed for invalid TOML
+- More semantic exceptions to be thrown, standardise the error message format.
