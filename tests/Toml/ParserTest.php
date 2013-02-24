@@ -65,13 +65,25 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
 	public function testParsingComments()
 	{
-		$p = Parser::fromString("# This is a comment\ntitle=\"TOML example\"");
-		$this->assertEquals($p, array('title' => 'TOML example'));
+		$p = Parser::fromString("# This is a comment\ntitle=\"TOML Example\"");
+		$this->assertEquals($p, array('title' => 'TOML Example'));
 	}
 
 	public function testLoadingFromFile()
 	{
 		$p = Parser::fromFile(__DIR__.'/example.toml');
-		$this->assertEquals($p, array('title' => 'TOML example'));
+		$this->assertEquals($p['title'], 'TOML Example');
+	}
+
+	public function testKeyGroup()
+	{
+		$p = Parser::fromString("[main]\nip = \"192.168.1.1\"");
+		$this->assertEquals($p, array('main' => array('ip' => '192.168.1.1')));
+	}
+
+	public function testNestedKeyGroup()
+	{
+		$p = Parser::fromString("[main.beta]\nip = \"192.168.1.1\"");
+		$this->assertEquals($p, array('main' => array('beta' => array('ip' => '192.168.1.1'))));
 	}
 }

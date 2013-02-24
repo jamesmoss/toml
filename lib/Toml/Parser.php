@@ -86,11 +86,11 @@ class Parser
 				$this->group[$part] = array();
 			}
 
-			$this->group = &$pointer[$part];
+			$this->group = &$this->group[$part];
 		}
 	}
 
-	public function parseValue($value)
+	protected function parseValue($value)
 	{
 		// Detect bools
 		if($value === 'true' || $value === 'false') {
@@ -143,7 +143,7 @@ class Parser
 	protected function parseArray($array)
 	{
 		$array = preg_replace('/^\s*\[\s*(.*)\s*\]\s*$/um', "$1", $array);
-		
+
 		$depth = 0;
 		$buffer = '';
 		$result = array();
