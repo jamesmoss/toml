@@ -109,15 +109,12 @@ class Parser
 
 		// Detect string
 		if(preg_match('/^"(.*)"$/u', $value, $matches)) {
-			return $this->parseString($matches[1]);
+			return $this->parseString($value);
 		}
 		
 		// Detect datetime
-		try {
-			$date = new \Datetime($value);
-			return $date;
-		} catch(Exception $e) {
-			var_dump(123);
+		if(strtotime($value)) {
+			return $date = new \Datetime($value);
 		}
 
 		// Detect arrays
@@ -126,11 +123,13 @@ class Parser
 			return $this->parseArray($value);
 		}
 		
-		throw new Exception(sprintf('Unknown data type for `%s`', $value));
+		throw new \Exception(sprintf('Unknown data type for `%s`', $value));
 	}
 
 	protected function parseString($string)
 	{
+		$string = trim($string, '"');
+
 		return strtr($string, array(
 			'\\0'  => "\0",
 			'\\t'  => "\t",
@@ -143,8 +142,43 @@ class Parser
 
 	protected function parseArray($array)
 	{
-		$contents = trim($array, '[] ');
+		$array = preg_replace('/^\s*\[\s*(.*)\s*\]\s*$/um', "$1", $array);
+		
+		$depth = 0;
+		$buffer = '';
+		$result = array();
+		$searchEndOfArray = false;
+		$insideString = false;
+		for($i = 0; $i < strlen($array); $i++) {
+			
+			if($array[$i] == '[') {
+				$depth++;
+				$searchEndOfArray = $depth;
+			}
 
-		var_dump($contents);
+			if($array[$i] == ']') {
+				if($searchEndOfArray === $depth) {
+					$searchEndOfArray = false;
+				}
+				$depth--;
+			}
+
+			if($array[$i] === '"' && $array[$i-1] !== '\\') {
+				$insideString = !$insideString;
+			}
+
+			if(!$insideString && $array[$i] == ',' && false === $searchEndOfArray ) {
+				$result[] = $this->parseValue(trim($buffer));
+				$buffer = '';
+				continue;
+			}
+
+			$buffer.= $array[$i];
+		}
+
+		// whatever is left in the buffer should be the last element
+		$result[] = $this->parseValue(trim($buffer));
+
+		return $result;
 	}
 }

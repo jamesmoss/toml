@@ -10,7 +10,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($p, array('title' => 'TOML example'));
 	}
 
-	public function testParsingMultilineStrings()
+	public function testParsingStringsWithLineBreaks()
 	{
 		$p = Parser::fromString('bio = "PHP Developer\nLives in Brighton, England."');
 		$this->assertEquals($p, array('bio' => "PHP Developer\nLives in Brighton, England."));
@@ -47,6 +47,12 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 	{
 		$p = Parser::fromString('ports = [9001, 9002, 9003]');
 		$this->assertEquals($p, array('ports' => array(9001, 9002, 9003)));
+	}
+
+	public function testParsingMultiArray()
+	{
+		$p = Parser::fromString('data = [ [ 1, 2 ], ["a", "b" , "c" ] ]');
+		$this->assertEquals($p, array('data' => array(array(1, 2), array('a', 'b', 'c'))));
 	}
 
 	/**
