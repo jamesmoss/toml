@@ -10,6 +10,14 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals(array('title' => 'TOML example'), $p);
 	}
 
+	/**
+	* @expectedException Exception
+	*/
+	public function testParsingBadStrings()
+	{
+		$p = Parser::fromString('title = "TOML example'); // Missing closing quote
+	}
+
 	public function testParsingStringsWithLineBreaks()
 	{
 		$p = Parser::fromString('bio = "PHP Developer\nLives in Brighton, England."');
@@ -53,6 +61,12 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 	{
 		$p = Parser::fromString('data = [ [ 1, 2 ], ["a", "b" , "c" ] ]');
 		$this->assertEquals(array('data' => array(array(1, 2), array('a', 'b', 'c'))), $p);
+	}
+
+	public function testParsingMultiArrayOverMultipleLines()
+	{
+		$p = Parser::fromString("data = [ \n[ 1, 2 ], \n[true, \nfalse, true,]\n]");
+		$this->assertEquals(array('data' => array(array(1, 2), array(true, false, true))), $p);
 	}
 
 	public function testParsingMultiArrayWithTrailingCommas()

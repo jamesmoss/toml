@@ -1,6 +1,6 @@
 # TOML for PHP
 
-An parser for [TOML](https://github.com/mojombo/toml) written in PHP.
+An parser for [TOML](https://github.com/mojombo/toml) written in PHP. Currently supports 100% of the TOML spec.
 
 ## Requirements
 
@@ -38,6 +38,5 @@ Fork this repo, create a new branch and submit a pull request. Make sure any fea
    
 ## Todo
 
-- Support multi line arrays
 - Better documentation and docblocks
 - Better errors displayed for invalid TOML

@@ -10,6 +10,7 @@ class Parser
 	protected $raw;
 	protected $doc = array();
 	protected $group;
+	protected $lineNum = 0;
 
 	public function __construct($raw)
 	{
@@ -35,20 +36,71 @@ class Parser
 
 	public function parse()
 	{
-		$lines = explode("\n", $this->raw);
+		$inString   = false;
+		$arrayDepth = 0;
+		$inComment  = false;
+		$buffer     = '';
 
-		foreach($lines as $line) {
-			$this->processLine($line);
+		// Loop over each character in the file, each line gets built up in $buffer
+		// We can't simple explode on newlines because arrays can be declared
+		// over multiple lines.
+		for($i = 0; $i < strlen($this->raw); $i++) {
+			$this->lineNum++;
+			$char = $this->raw[$i];
+
+			// Detect start / end of string boundries
+			if($char === '"' && $this->raw[$i-1] !== '\\') {
+				$inString = !$inString;
+			}
+
+			// Detect start of comments
+			if($char === '#' && !$inString) {
+				$inComment = true;
+			}
+
+			if($char === '[' && !$inString) {
+				$arrayDepth++;
+			}
+
+			if($char === ']' && !$inString) {
+				$arrayDepth--;
+			}
+
+			// At a line break or the end of the document see whats going on
+			if($char === "\n") {
+				// Line breaks arent allowed inside strings
+				if($inString) {
+					throw new \Exception('Multiline strings are not supported.');	
+				}
+
+				if(!$inArray && $arrayDepth == 0) {
+					$this->processLine($buffer);
+					$inComment = false;
+					$buffer = '';
+					continue;
+				}
+			}
+
+			// Don't append to the buffer if we're inside a comment
+			if($inComment) {
+				continue;
+			}
+
+			$buffer.= $char;
 		}
+
+		// Process any straggling content left in the buffer
+		$this->processLine($buffer);
 
 		return $this->doc;
 	}
 
 	protected function processLine($raw)
 	{
-		$line = trim($raw);
-		$line = $this->stripComments($line);
-
+		// replace new lines with a space to make parsing easier down the line.
+		$line = str_replace("\n", ' ', $raw);
+		$line = trim($line);
+		
 		// Skip blank lines
 		if(empty($line)) {
 			return;
@@ -66,7 +118,7 @@ class Parser
 			return;
 		}
 
-		throw new \Exception(sprintf('Invalid TOML syntax `%s`', $raw));
+		throw new \Exception(sprintf('Invalid TOML syntax `%s` on line %s.', $raw, $this->lineNum));
 	}
 
 	protected function stripComments($line)
@@ -113,8 +165,8 @@ class Parser
 		}
 		
 		// Detect datetime
-		if(strtotime($value)) {
-			return $date = new \Datetime($value);
+		if(preg_match('/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$/', $value)) {
+			return new \Datetime($value);
 		}
 
 		// Detect arrays
@@ -123,7 +175,7 @@ class Parser
 			return $this->parseArray($value);
 		}
 		
-		throw new \Exception(sprintf('Unknown data type for `%s`', $value));
+		throw new \Exception(sprintf('Unknown primative for `%s` on line %s.', $value, $this->lineNum));
 	}
 
 	protected function parseString($string)
@@ -142,6 +194,7 @@ class Parser
 
 	protected function parseArray($array)
 	{
+		// strips the outer wrapping [ and ] characters and and whitespace from the strip
 		$array = preg_replace('/^\s*\[\s*(.*)\s*\]\s*$/um', "$1", $array);
 
 		$depth = 0;
@@ -176,8 +229,15 @@ class Parser
 			$buffer.= $array[$i];
 		}
 
-		// whatever is left in the buffer should be the last element
-		$result[] = $this->parseValue(trim($buffer));
+		// Array hasnt been closed properly
+		if($searchEndOfArray !== false) {
+			throw new \Exception(sprintf('Unclosed array on line %s', $this->lineNum));
+		}
+
+		// whatever meaningful text left in the buffer should be the last element
+		if($buffer = trim($buffer)) {
+			$result[] = $this->parseValue($buffer);
+		}
 
 		return $result;
 	}
