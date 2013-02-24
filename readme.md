@@ -1,6 +1,6 @@
 # TOML for PHP
 
-An parser for [TOML](https://github.com/mojombo/toml) written in PHP. Currently supports 100% of the TOML spec.
+A parser for [TOML](https://github.com/mojombo/toml) written in PHP. Currently supports 100% of the TOML spec.
 
 ## Requirements
 
@@ -27,7 +27,7 @@ You can use this lib without composer but you'll need to provide your own PSR-0 
     
 ## Running tests
 
-There is 100% test coverage at the moment. If you'd like to run the tests use the following:
+There is 100% test coverage at the moment. If you'd like to run the tests youself, use the following:
 
     $ composer update
     $ phpunit .
