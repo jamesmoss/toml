@@ -69,11 +69,6 @@ class Parser
 		throw new \Exception(sprintf('Invalid TOML syntax `%s`', $raw));
 	}
 
-	protected function processKey($line)
-	{
-		
-	}
-
 	protected function stripComments($line)
 	{
 		$output = explode('#', $line);
@@ -117,6 +112,21 @@ class Parser
 			return $this->parseString($matches[1]);
 		}
 		
+		// Detect datetime
+		try {
+			$date = new \Datetime($value);
+			return $date;
+		} catch(Exception $e) {
+			var_dump(123);
+		}
+
+		// Detect arrays
+		// TODO: Support multiline arrays
+		if(preg_match('/^\[(.*)\]$/u', $value)) {
+			return $this->parseArray($value);
+		}
+		
+		throw new Exception(sprintf('Unknown data type for `%s`', $value));
 	}
 
 	protected function parseString($string)
@@ -129,5 +139,12 @@ class Parser
 			'\\"'  => '"',
 			'\\\\' => '\\',
 		));
+	}
+
+	protected function parseArray($array)
+	{
+		$contents = trim($array, '[] ');
+
+		var_dump($contents);
 	}
 }

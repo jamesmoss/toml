@@ -49,6 +49,14 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($p, array('ports' => array(9001, 9002, 9003)));
 	}
 
+	/**
+	* @expectedException Exception
+	*/
+	public function testParsingBadValue()
+	{
+		$p = Parser::fromString('profit = maybe');
+	}
+
 	public function testParsingComments()
 	{
 		$p = Parser::fromString("# This is a comment\ntitle=\"TOML example\"");
