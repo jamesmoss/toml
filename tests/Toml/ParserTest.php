@@ -2,7 +2,7 @@
 
 namespace Toml;
 
-class ParserTest
+class ParserTest extends \PHPUnit_Framework_TestCase
 {
 	public function testParsingStrings()
 	{
@@ -31,7 +31,7 @@ class ParserTest
 	public function testParsingDates()
 	{
 		$p = Parser::fromString('dob = 1985-10-10T07:00:00Z');
-		$this->assertEquals($p, array('dob' => new Datetime('1985-10-10T07:00:00Z')));
+		$this->assertEquals($p, array('dob' => new \Datetime('1985-10-10T07:00:00Z')));
 	}
 
 	public function testParsingBoolean()
