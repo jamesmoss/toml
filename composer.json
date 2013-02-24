@@ -1,6 +1,6 @@
 {
 	"name": "jamesmoss/toml",
-	"description": "A simple key/value store with namespace support and backends for memcached, apc, and more.",
+	"description": "A parser for TOML implemented in PHP.",
 	"keywords": ["toml","github", "mojombo"],
 	"homepage": "http://github.com/jamesmoss/toml",
 	"license": "MIT",

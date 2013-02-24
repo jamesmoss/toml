@@ -11,7 +11,7 @@ An parser for [TOML](https://github.com/mojombo/toml) written in PHP.
 
 Use [Composer](http://getcomposer.org/) to install the Toml package. Package details [can be found on Packagist.org](https://packagist.org/packages/jamesmoss/toml).
 
-You can use this lib without composer but you'll need to provide your own PSR-0 compatible autoloader. Really should just use Composer.
+You can use this lib without composer but you'll need to provide your own PSR-0 compatible autoloader. Really you should just use Composer.
 
 ## Use
 
@@ -26,6 +26,8 @@ You can use this lib without composer but you'll need to provide your own PSR-0 
     $toml = Parser::fromFile(__DIR__ . '/config.toml');
     
 ## Running tests
+
+There is 100% test coverage at the moment. If you'd like to run the tests use the following:
 
     $ composer update
     $ phpunit .
