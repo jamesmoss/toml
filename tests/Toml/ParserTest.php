@@ -74,6 +74,14 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals(array('ports' => array(9001, 9002, 9003)), $p);
 	}
 
+	/**
+	* @expectedException Exception
+	*/
+	public function testParsingMixedTypeArray()
+	{
+		$p = Parser::fromString('data = [ [ 1, true ], ["a", 5.4 , "c" ],  1985-10-10T07:00:00Z]');
+	}
+
 	public function testParsingMultiArray()
 	{
 		$p = Parser::fromString('data = [ [ 1, 2 ], ["a", "b" , "c" ] ]');

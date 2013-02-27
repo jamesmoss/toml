@@ -216,7 +216,9 @@ class Parser
 		$result           = array();
 		$searchEndOfArray = false;
 		$insideString     = false;
-		// TODO: This is a duplicate of the logic in the parse() method.
+
+		// TODO: This is a 80% duplicate of the logic in the parse() method.
+		// Find a way to combine these blocks
 		for($i = 0; $i < strlen($array); $i++) {
 			
 			if($array[$i] === '[') {
@@ -237,6 +239,7 @@ class Parser
 
 			if(!$insideString && $array[$i] === ',' && false === $searchEndOfArray ) {
 				$result[] = $this->parseValue(trim($buffer));
+				$this->validateArrayElementTypes($result);
 				$buffer = '';
 				continue;
 			}
@@ -244,7 +247,7 @@ class Parser
 			$buffer.= $array[$i];
 		}
 
-		// Array hasnt been closed properly
+		// Detect if array hasnt been closed properly
 		if($searchEndOfArray !== false) {
 			throw new \Exception(sprintf('Unclosed array on line %s', $this->lineNum));
 		}
@@ -252,8 +255,27 @@ class Parser
 		// whatever meaningful text left in the buffer should be the last element
 		if($buffer = trim($buffer)) {
 			$result[] = $this->parseValue($buffer);
+			$this->validateArrayElementTypes($result);
 		}
 
 		return $result;
+	}
+
+	protected function validateArrayElementTypes($array)
+	{
+		if(count($array) < 2) {
+			return;
+		}
+
+		// Check the last two elements match in type (and classname if they are objects)
+		// TODO: Tidy this up
+		$indexA = count($array) - 2;
+		$indexB = count($array) - 1;
+		$typeA = gettype($array[$indexA]) === 'object' ? get_class($array[$indexA]) : gettype($array[$indexA]);
+		$typeB = gettype($array[$indexB]) === 'object' ? get_class($array[$indexB]) : gettype($array[$indexB]);
+		
+		if($typeA !== $typeB) {
+			throw new \Exception(sprintf('Arrays cannot contain mixed types on line %s', $this->lineNum));
+		}
 	}
 }
