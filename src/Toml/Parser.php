@@ -47,14 +47,14 @@ class Parser
 		for($i = 0; $i < strlen($this->raw); $i++) {
 			$char = $this->raw[$i];
 
-			// Detect start / end of string boundries
-			if($char === '"' && $this->raw[$i-1] !== '\\') {
-				$inString = !$inString;
-			}
-
 			// Detect start of comments
 			if($char === '#' && !$inString) {
 				$inComment = true;
+			}
+
+			// Detect start / end of string boundries
+			if($char === '"' && $this->raw[$i-1] !== '\\') {
+				$inString = !$inString;
 			}
 
 			if($char === '[' && !$inString) {
@@ -68,6 +68,7 @@ class Parser
 			// At a line break or the end of the document see whats going on
 			if($char === "\n") {
 				$this->lineNum++;
+				$inComment = false;
 				
 				// Line breaks arent allowed inside strings
 				if($inString) {
@@ -76,7 +77,6 @@ class Parser
 
 				if($arrayDepth === 0) {
 					$this->processLine($buffer);
-					$inComment = false;
 					$buffer = '';
 					continue;
 				}
@@ -124,13 +124,6 @@ class Parser
 		}
 
 		throw new \Exception(sprintf('Invalid TOML syntax `%s` on line %s.', $raw, $this->lineNum));
-	}
-
-	protected function stripComments($line)
-	{
-		$output = explode('#', $line);
-
-		return trim($output[0]);
 	}
 
 	protected function setGroup($keyGroup)
@@ -210,27 +203,23 @@ class Parser
 	protected function parseArray($array)
 	{
 		// strips the outer wrapping [ and ] characters and and whitespace from the strip
-		$array = preg_replace('/^\s*\[\s*(.*)\s*\]\s*$/um', "$1", $array);
+		$array = preg_replace('/^\s*\[\s*(.*)\s*\]\s*$/usm', "$1", $array);
 
 		$depth            = 0;
 		$buffer           = '';
 		$result           = array();
-		$searchEndOfArray = false;
 		$insideString     = false;
+		$insideComment    = false;
 
 		// TODO: This is a 80% duplicate of the logic in the parse() method.
 		// Find a way to combine these blocks
 		for($i = 0; $i < strlen($array); $i++) {
 			
-			if($array[$i] === '[') {
+			if(!$insideString && $array[$i] === '[') {
 				$depth++;
-				$searchEndOfArray = $depth;
 			}
 
-			if($array[$i] === ']') {
-				if($searchEndOfArray === $depth) {
-					$searchEndOfArray = false;
-				}
+			if(!$insideString && $array[$i] === ']') {
 				$depth--;
 			}
 
@@ -238,10 +227,22 @@ class Parser
 				$insideString = !$insideString;
 			}
 
-			if(!$insideString && $array[$i] === ',' && false === $searchEndOfArray ) {
+			if(!$insideString && $array[$i] === '#') {
+				$insideComment = true;
+			}
+
+			if(!$insideString && $array[$i] === ',' && 0 === $depth) {
 				$result[] = $this->parseValue(trim($buffer));
 				$this->validateArrayElementTypes($result);
 				$buffer = '';
+				continue;
+			}
+
+			if($array[$i] === "\n") {
+				$insideComment = false;
+			}
+
+			if($insideComment === true) {
 				continue;
 			}
 
@@ -249,7 +250,7 @@ class Parser
 		}
 
 		// Detect if array hasnt been closed properly
-		if($searchEndOfArray !== false) {
+		if(0 !== $depth) {
 			throw new \Exception(sprintf('Unclosed array on line %s', $this->lineNum));
 		}
 

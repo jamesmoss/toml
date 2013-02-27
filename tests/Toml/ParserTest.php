@@ -90,8 +90,17 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
 	public function testParsingMultiArrayOverMultipleLines()
 	{
-		$p = Parser::fromString("data = [ \n[ 1, 2 ], \n[true, \nfalse, true,]\n]");
-		$this->assertEquals(array('data' => array(array(1, 2), array(true, false, true))), $p);
+		$p = Parser::fromString('data = [ 
+			[ 1, 2 ],
+			[true, 
+				false, true,],
+			["This is a # hash symbol"] # This comment makes it complex
+		]');
+		$this->assertEquals(array('data' => array(
+			array(1, 2),
+			array(true, false, true), 
+			array('This is a # hash symbol')
+		)), $p);
 	}
 
 	public function testParsingMultiArrayWithTrailingCommas()
@@ -110,8 +119,12 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
 	public function testParsingComments()
 	{
-		$p = Parser::fromString("# This is a comment\ntitle=\"TOML Example\"");
-		$this->assertEquals(array('title' => 'TOML Example'), $p);
+		$p = Parser::fromString('
+			# This is a comment
+			title="TOML Example"
+			stumped="This string contains a #hashtag" # But only this comment should be stripped
+		');
+		$this->assertEquals(array('title' => 'TOML Example', 'stumped' => 'This string contains a #hashtag'), $p);
 	}
 
 	public function testLoadingFromFile()
