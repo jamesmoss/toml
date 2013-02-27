@@ -224,7 +224,7 @@ class Parser
 				$depth--;
 			}
 
-			if($array[$i] === '"' && $array[$i-1] !== '\\') {
+			if($array[$i] === '"' && ((isset($array[$i-1]) && $array[$i-1] !== '\\') || $i === 0))  {
 				$insideString = !$insideString;
 			}
 
