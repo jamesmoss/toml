@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/jamesmoss/toml.png?branch=master)](https://travis-ci.org/jamesmoss/toml)
 
-A parser for [TOML](https://github.com/mojombo/toml) written in PHP. Currently supports 100% of the TOML spec: dates, multiline arrays, key groups, the lot.
+A parser for [TOML](https://github.com/mojombo/toml) written in PHP. Currently supports 100% of the TOML spec: dates, multiline arrays, key groups - the lot (including all of the more minor restrictions such as same-type arrays and key group override rules).
 
 ## Requirements
 
@@ -17,10 +17,10 @@ Add the following to your `composer.json` and run `composer update`.
 
     "require": {
     	//...
-        "jamesmoss/toml": "*"
+        "jamesmoss/toml": "dev-master"
     }
 
-You can use this lib without composer but you'll need to provide your own PSR-0 compatible autoloader. Really, you should just use Composer.
+You can use this lib without Composer but you'll need to provide your own PSR-0 compatible autoloader. Really, you should just use Composer.
 
 ## Use
 
