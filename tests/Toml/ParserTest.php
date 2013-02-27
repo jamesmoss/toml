@@ -39,10 +39,18 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals(array('age' => 27), $p);
 	}
 
-	public function testParsingFloats()
+	public function testParsingGoodFloats()
 	{
 		$p = Parser::fromString('pi = 3.14');
 		$this->assertEquals(array('pi' => 3.14), $p);
+	}
+
+	/**
+	* @expectedException Exception
+	*/
+	public function testParsingBadFloats()
+	{
+		$p = Parser::fromString('size = .000001');
 	}
 
 	public function testParsingDates()

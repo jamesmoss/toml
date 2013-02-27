@@ -156,7 +156,7 @@ class Parser
 		}
 
 		// Detect floats
-		if(preg_match('/^\-?\d*?\.\d+$/', $value)) {
+		if(preg_match('/^\-?\d+\.\d+$/', $value)) {
 			return (float)$value;
 		}
 
