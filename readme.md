@@ -1,6 +1,6 @@
 # TOML for PHP
 
-A parser for [TOML](https://github.com/mojombo/toml) written in PHP. Currently supports 100% of the TOML spec.
+A parser for [TOML](https://github.com/mojombo/toml) written in PHP. Currently supports 100% of the TOML spec: dates, multiline arrays, key groups, the lot.
 
 ## Requirements
 
@@ -11,30 +11,39 @@ A parser for [TOML](https://github.com/mojombo/toml) written in PHP. Currently s
 
 Use [Composer](http://getcomposer.org/) to install the Toml package. Package details [can be found on Packagist.org](https://packagist.org/packages/jamesmoss/toml).
 
-You can use this lib without composer but you'll need to provide your own PSR-0 compatible autoloader. Really you should just use Composer.
+Add the following to your `composer.json` and run `composer update`.
+
+    "require": {
+    	//...
+        "jamesmoss/toml": "*"
+    }
+
+You can use this lib without composer but you'll need to provide your own PSR-0 compatible autoloader. Really, you should just use Composer.
 
 ## Use
 
-`Toml\Parser` has two static methods `fromString` and `fromFile`, which are self explanatory. Both return an associative array. If your TOML doc can't be parsed an `Exception` will be thrown.
+`Toml\Parser` has two static methods `fromString` and `fromFile`, which are self explanatory. Both return an associative array. If your TOML doc can't be parsed an `Exception` will be thrown with a useful error message.
 
     use Toml\Parser;
     
     // Load directly from a string
     $toml = Parser::fromString('name = "James Moss"');
+
+    var_dump($toml['name']); // outputs 'James Moss'.
     
     // Load from a file instead
     $toml = Parser::fromFile(__DIR__ . '/config.toml');
     
 ## Running tests
 
-There is 100% test coverage at the moment. If you'd like to run the tests youself, use the following:
+There is 100% test coverage at the moment. If you'd like to run the tests yourself, use the following:
 
     $ composer update
-    $ phpunit .
+    $ phpunit
 
 ## Contributing
 
-Fork this repo, create a new branch and submit a pull request. Make sure any features you add are covered by unit tests.  
+The TOML spec is changing often as it's in its infancy; if you spot something I've missed fork this repo, create a new branch and submit a pull request. Make sure any features you add are covered by unit tests.  
    
 ## Todo
 

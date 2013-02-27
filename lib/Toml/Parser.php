@@ -187,14 +187,16 @@ class Parser
 	{
 		$string = trim($string, '"');
 
-		return strtr($string, array(
+		$allowedEscapes = array(
 			'\\0'  => "\0",
 			'\\t'  => "\t",
 			'\\n'  => "\n",
 			'\\r'  => "\r",
 			'\\"'  => '"',
 			'\\\\' => '\\',
-		));
+		);
+
+		return strtr($string, $allowedEscapes);
 	}
 
 	protected function parseArray($array)
