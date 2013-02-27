@@ -10,7 +10,7 @@ class Parser
 	protected $raw;
 	protected $doc = array();
 	protected $group;
-	protected $lineNum = 0;
+	protected $lineNum = 1;
 
 	public function __construct($raw)
 	{
@@ -45,7 +45,6 @@ class Parser
 		// We can't simple explode on newlines because arrays can be declared
 		// over multiple lines.
 		for($i = 0; $i < strlen($this->raw); $i++) {
-			$this->lineNum++;
 			$char = $this->raw[$i];
 
 			// Detect start / end of string boundries
@@ -68,6 +67,8 @@ class Parser
 
 			// At a line break or the end of the document see whats going on
 			if($char === "\n") {
+				$this->lineNum++;
+				
 				// Line breaks arent allowed inside strings
 				if($inString) {
 					throw new \Exception('Multiline strings are not supported.');	
@@ -273,7 +274,7 @@ class Parser
 		$indexB = count($array) - 1;
 		$typeA = gettype($array[$indexA]) === 'object' ? get_class($array[$indexA]) : gettype($array[$indexA]);
 		$typeB = gettype($array[$indexB]) === 'object' ? get_class($array[$indexB]) : gettype($array[$indexB]);
-		
+
 		if($typeA !== $typeB) {
 			throw new \Exception(sprintf('Arrays cannot contain mixed types on line %s', $this->lineNum));
 		}
