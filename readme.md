@@ -1,5 +1,7 @@
 # TOML for PHP
 
+[![Build Status](https://travis-ci.org/jamesmoss/toml.png?branch=master)](https://travis-ci.org/jamesmoss/toml)
+
 A parser for [TOML](https://github.com/mojombo/toml) written in PHP. Currently supports 100% of the TOML spec: dates, multiline arrays, key groups, the lot.
 
 ## Requirements
