@@ -196,6 +196,13 @@ class Parser
 			'\\\\' => '\\',
 		);
 
+		// Check for invalid escape codes by removing valid ones and looking for backslash character
+		// This negates any complex regex to detect two (or more) adjoining back slash escape sequences
+		$check = str_replace(array_keys($allowedEscapes), '', $string);
+		if(false !== strpos($check, '\\')) {
+			throw new \Exception(sprintf('Invalid escape sequence on line %s', $this->lineNum));
+		}
+
 		return strtr($string, $allowedEscapes);
 	}
 

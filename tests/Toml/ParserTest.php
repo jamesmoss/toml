@@ -13,12 +13,21 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 	/**
 	* @expectedException Exception
 	*/
-	public function testParsingBadStrings()
+	public function testParsingMissingClosingQuoteString()
 	{
 		$p = Parser::fromString('title = "TOML example'); // Missing closing quote
 	}
 
-	public function testParsingStringsWithLineBreaks()
+	/**
+	* @expectedException Exception
+	*/
+	public function testInvalidEscapeSequenceStrings()
+	{
+		$s = 'This is A:\\invalid\\file\\path. This\\nShould\\tBe okay. This\\\\\\Should con\\\\fuse things';
+		$p = Parser::fromString('title = "'.$s.'"'); // Missing closing quote
+	}
+
+	public function testParsingStringsWithLineBreakEscapeSequence()
 	{
 		$p = Parser::fromString('bio = "PHP Developer\nLives in Brighton, England."');
 		$this->assertEquals(array('bio' => "PHP Developer\nLives in Brighton, England."), $p);
