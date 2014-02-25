@@ -27,6 +27,15 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 		$p = Parser::fromString('title = "'.$s.'"'); // Missing closing quote
 	}
 
+	public function testUnicodeEscapeSequenceStrings()
+	{
+		$s = '\\u00C2wesom\\u0207!';
+		$p = Parser::fromString('title = "'.$s.'"'); // Missing closing quote
+
+
+		$this->assertEquals('Âwesomȇ!', $p['title']);
+	}
+
 	public function testParsingStringsWithLineBreakEscapeSequence()
 	{
 		$p = Parser::fromString('bio = "PHP Developer\nLives in Brighton, England."');
@@ -90,15 +99,15 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
 	public function testParsingMultiArrayOverMultipleLines()
 	{
-		$p = Parser::fromString('data = [ 
+		$p = Parser::fromString('data = [
 			[ 1, 2 ],
-			[true, 
+			[true,
 				false, true,],
 			["This is a # hash symbol"] # This comment makes it complex
 		]');
 		$this->assertEquals(array('data' => array(
 			array(1, 2),
-			array(true, false, true), 
+			array(true, false, true),
 			array('This is a # hash symbol')
 		)), $p);
 	}
@@ -152,7 +161,6 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 		$p = Parser::fromString("[main.beta]\nip = \"192.168.1.1\"");
 		$this->assertEquals(array('main' => array('beta' => array('ip' => '192.168.1.1'))), $p);
 	}
-
 	/**
 	* @expectedException Exception
 	*/

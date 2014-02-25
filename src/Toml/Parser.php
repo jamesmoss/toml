@@ -69,10 +69,10 @@ class Parser
 			if($char === "\n") {
 				$this->lineNum++;
 				$inComment = false;
-				
+
 				// Line breaks arent allowed inside strings
 				if($inString) {
-					throw new \Exception('Multiline strings are not supported.');	
+					throw new \Exception('Multiline strings are not supported.');
 				}
 
 				if($arrayDepth === 0) {
@@ -105,7 +105,7 @@ class Parser
 		// replace new lines with a space to make parsing easier down the line.
 		$line = str_replace("\n", ' ', $raw);
 		$line = trim($line);
-		
+
 		// Skip blank lines
 		if(empty($line)) {
 			return;
@@ -163,7 +163,7 @@ class Parser
 		if(preg_match('/^"(.*)"$/u', $value, $matches)) {
 			return $this->parseString($value);
 		}
-		
+
 		// Detect datetime
 		if(preg_match('/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$/', $value)) {
 			return new \Datetime($value);
@@ -173,7 +173,7 @@ class Parser
 		if(preg_match('/^\[(.*)\]$/u', $value)) {
 			return $this->parseArray($value);
 		}
-		
+
 		throw new \Exception(sprintf('Unknown primative for `%s` on line %s.', $value, $this->lineNum));
 	}
 
@@ -181,23 +181,25 @@ class Parser
 	{
 		$string = trim($string, '"');
 
-		$allowedEscapes = array(
-			'\\0'  => "\0",
-			'\\t'  => "\t",
-			'\\n'  => "\n",
-			'\\r'  => "\r",
-			'\\"'  => '"',
-			'\\\\' => '\\',
-		);
+		$allowedEscapes = implode('|', array(
+			'\\\\0',
+			'\\\\t',
+			'\\\\n',
+			'\\\\r',
+			'\\\\"',
+			'\\\\\\\\',
+			'\\\\u[0-9A-Fa-f]{4}',
+		));
 
 		// Check for invalid escape codes by removing valid ones and looking for backslash character
 		// This negates any complex regex to detect two (or more) adjoining back slash escape sequences
-		$check = str_replace(array_keys($allowedEscapes), '', $string);
+		$check = preg_replace('/'.$allowedEscapes.'/ums', '', $string);
+
 		if(false !== strpos($check, '\\')) {
 			throw new \Exception(sprintf('Invalid escape sequence on line %s', $this->lineNum));
 		}
 
-		return strtr($string, $allowedEscapes);
+		return (string)json_decode('"'.$string.'"');
 	}
 
 	protected function parseArray($array)
@@ -214,7 +216,7 @@ class Parser
 		// TODO: This is a 80% duplicate of the logic in the parse() method.
 		// Find a way to combine these blocks
 		for($i = 0; $i < strlen($array); $i++) {
-			
+
 			if(!$insideString && $array[$i] === '[') {
 				$depth++;
 			}
