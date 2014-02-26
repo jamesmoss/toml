@@ -161,11 +161,35 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 		$p = Parser::fromString("[main.beta]\nip = \"192.168.1.1\"");
 		$this->assertEquals(array('main' => array('beta' => array('ip' => '192.168.1.1'))), $p);
 	}
+
 	/**
 	* @expectedException Exception
 	*/
 	public function testKeyGroupsDontOverrideDeclaredKeys()
 	{
 		$p = Parser::fromString("[fruit] type = \"apple\"\n[fruit.type]\napple = \"yes\"");
+	}
+
+	public function testSimpleTable()
+	{
+		$p = Parser::fromString('
+			[[products]]
+			name = "Hammer"
+			sku = 738594937
+
+			[[products]]
+
+			[[products]]
+			name = "Nail"
+			sku = 284758393
+			color = "gray"
+		');
+		$this->assertEquals(array(
+			'products' => array(
+				array('name' => 'Hammer', 'sku' => 738594937),
+				array(),
+				array('name' => 'Nail', 'sku' => 738594937, 'color' => 'gray'),
+			),
+		), $p);
 	}
 }
